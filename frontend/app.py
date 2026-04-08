@@ -307,7 +307,6 @@ with left:
         label_visibility="collapsed",
         height=185,
         placeholder="Example: The experiment results was interesting and we needs to investigate more.",
-        value=st.session_state.get("input_text", ""),
         key="input_text",
     )
 
@@ -331,117 +330,123 @@ if submit and not text.strip():
 if submit and text.strip():
     with st.spinner("Analyzing text..."):
         try:
-            try:
-                resp = requests.post(
-                    f"{API_URL}/analyze",
-                    json={"user_id": user_id, "text": text},
-                    timeout=10,  # 🔥 reduced timeout
-                )
-            except requests.exceptions.ReadTimeout:
-                st.error("⏳ Server is taking too long. Please try again.")
-                st.stop()
-            if resp.status_code != 200:
-                st.error(f"API error: {resp.text}")
+            resp = requests.post(
+                f"{API_URL}/analyze",
+                json={"user_id": user_id, "text": text},
+                timeout=180,
+            )
+            if resp.status_code == 200:
+                st.session_state["analysis_data"] = resp.json()
+                st.session_state["ai_improved"] = None # clear any previous AI improvement
             else:
-                data = resp.json()
-                if not data:
-                  st.error("Empty response from server.")
-                  st.stop()
-                sp = data.get("style_profile", {})
-
-                st.markdown("---")
-                c1, c2 = st.columns([1.2, 1], gap="large")
-
-                with c1:
-                    st.markdown("### ✅ Corrected Text")
-                    st.markdown(
-                        f'<div class="result-box">{data["corrected_text"]}</div>',
-                        unsafe_allow_html=True,
-                    )
-
-                with c2:
-                    st.markdown("### 🧭 Domain")
-                    domain = data.get("domain", "casual")
-                    conf = float(data.get("domain_confidence", 0.0))
-                    badge_class = f"domain-{domain}" if domain in {
-                        "academic",
-                        "casual",
-                        "business",
-                    } else "domain-casual"
-                    st.markdown(
-                        f'<span class="domain-chip {badge_class}">{domain.upper()} · {conf:.0%}</span>',
-                        unsafe_allow_html=True,
-                    )
-                    st.info(data.get("domain_advice", ""))
-
-                m1, m2, m3, m4 = st.columns(4)
-                m1.metric("Applied", data.get("corrections_applied", 0))
-                m2.metric("Skipped", data.get("corrections_skipped", 0))
-                m3.metric("Formality", f'{sp.get("formality_score", 0):.2f}')
-                m4.metric("Lexical Diversity", f'{sp.get("lexical_diversity", 0):.2f}')
-
-                st.markdown("### 📌 Correction Explanations")
-                explanations = data.get("explanations", [])
-                if explanations:
-                    for i, exp in enumerate(explanations, start=1):
-                        with st.expander(
-                            f'{i}. {exp.get("error_type", "Issue")}: '
-                            f'`{exp.get("original", "")}` → `{exp.get("suggestion", "")}`'
-                        ):
-                            st.markdown(
-                                f'<div class="explain-card"><b>Reason:</b> {exp.get("explanation", "")}</div>',
-                                unsafe_allow_html=True,
-                            )
-                            note = exp.get("filter_note")
-                            if note:
-                                st.caption(f"Filter note: {note}")
-                else:
-                    st.success("No issues found. Your text looks clean.")
-
-                st.markdown("### 🎨 Updated Style Profile")
-                p1, p2, p3 = st.columns(3)
-                p1.metric("Avg Sentence Length", sp.get("avg_sentence_length", "—"))
-                p2.metric("Tone", str(sp.get("tone", "—")).title())
-                p3.metric("Samples", sp.get("sample_count", "—"))
-
-                st.markdown("### 🙋 Feedback")
-                f1, f2 = st.columns(2)
-                with f1:
-                    if st.button("👍 This correction quality is good", use_container_width=True):
-                        fb_resp = requests.post(
-                            f"{API_URL}/feedback",
-                            json={"user_id": user_id, "accepted": True},
-                            timeout=10,
-                        )
-                        if fb_resp.status_code == 200:
-                            st.success("Saved feedback. Thanks!")
-                        else:
-                            st.warning("Could not save feedback right now.")
-                with f2:
-                    if st.button("👎 Too aggressive / not my style", use_container_width=True):
-                        fb_resp = requests.post(
-                            f"{API_URL}/feedback",
-                            json={"user_id": user_id, "accepted": False},
-                            timeout=10,
-                        )
-                        if fb_resp.status_code == 200:
-                            st.success("Saved feedback. We will adapt.")
-                        else:
-                            st.warning("Could not save feedback right now.")
-
-        except requests.ConnectionError:
+                st.error(f"API error: {resp.text}")
+        except requests.exceptions.ReadTimeout:
+            st.error("⏳ Server is taking too long. Please try again.")
+        except requests.exceptions.ConnectionError:
             st.error(
                 "Cannot connect to backend at `http://127.0.0.1:8000`.\n\n"
                 "Run:\n"
                 "`python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload`"
             )
+
+# Render the output if available in session_state
+if "analysis_data" in st.session_state and st.session_state["analysis_data"]:
+    data = st.session_state["analysis_data"]
+    sp = data.get("style_profile", {})
+
+    st.markdown("---")
+    c1, c2 = st.columns([1.2, 1], gap="large")
+
+    with c1:
+        st.markdown("### ✅ Corrected Text")
+        st.markdown(
+            f'<div class="result-box">{data.get("corrected_text", "")}</div>',
+            unsafe_allow_html=True,
+        )
+
+    with c2:
+        st.markdown("### 🧭 Domain")
+        domain = data.get("domain", "casual")
+        conf = float(data.get("domain_confidence", 0.0))
+        badge_class = f"domain-{domain}" if domain in {
+            "academic",
+            "casual",
+            "business",
+        } else "domain-casual"
+        st.markdown(
+            f'<span class="domain-chip {badge_class}">{domain.upper()} · {conf:.0%}</span>',
+            unsafe_allow_html=True,
+        )
+        st.info(data.get("domain_advice", ""))
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Applied", data.get("corrections_applied", 0))
+    m2.metric("Skipped", data.get("corrections_skipped", 0))
+    m3.metric("Formality", f'{sp.get("formality_score", 0):.2f}')
+    m4.metric("Lexical Diversity", f'{sp.get("lexical_diversity", 0):.2f}')
+
+    st.markdown("### 📌 Correction Explanations")
+    explanations = data.get("explanations", [])
+    if explanations:
+        for i, exp in enumerate(explanations, start=1):
+            with st.expander(
+                f'{i}. {exp.get("error_type", "Issue")}: '
+                f'`{exp.get("original", "")}` → `{exp.get("suggestion", "")}`'
+            ):
+                st.markdown(
+                    f'<div class="explain-card"><b>Reason:</b> {exp.get("explanation", "")}</div>',
+                    unsafe_allow_html=True,
+                )
+                note = exp.get("filter_note")
+                if note:
+                    st.caption(f"Filter note: {note}")
+    else:
+        st.success("No issues found. Your text looks clean.")
+
+    st.markdown("### 🎨 Updated Style Profile")
+    p1, p2, p3 = st.columns(3)
+    p1.metric("Avg Sentence Length", sp.get("avg_sentence_length", "—"))
+    p2.metric("Tone", str(sp.get("tone", "—")).title())
+    p3.metric("Samples", sp.get("sample_count", "—"))
+
+    st.markdown("### 🙋 Feedback")
+    f1, f2 = st.columns(2)
+    with f1:
+        if st.button("👍 This correction quality is good", use_container_width=True):
+            try:
+                fb_resp = requests.post(
+                    f"{API_URL}/feedback",
+                    json={"user_id": user_id, "accepted": True},
+                    timeout=10,
+                )
+                if fb_resp.status_code == 200:
+                    st.success("Saved feedback. Thanks!")
+                else:
+                    st.warning("Could not save feedback right now.")
+            except:
+                st.error("Connection failed.")
+    with f2:
+        if st.button("👎 Too aggressive / not my style", use_container_width=True):
+            try:
+                fb_resp = requests.post(
+                    f"{API_URL}/feedback",
+                    json={"user_id": user_id, "accepted": False},
+                    timeout=10,
+                )
+                if fb_resp.status_code == 200:
+                    st.success("Saved feedback. We will adapt.")
+                else:
+                    st.warning("Could not save feedback right now.")
+            except:
+                st.error("Connection failed.")
+
 if ai_button and text.strip():
     with st.spinner("🤖 AI is improving your text..."):
         try:
             resp = requests.post(
                 f"{API_URL}/ai-improve",
                 json={"user_id": user_id, "text": text},
-                timeout=20,
+                timeout=180,
             )
 
             if resp.status_code == 200:

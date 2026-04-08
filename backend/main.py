@@ -4,6 +4,8 @@ Orchestrates the full NLP pipeline:
   Grammar Check → Domain Detection → Style Extraction → Style Filtering → Response
 """
 
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -18,7 +20,11 @@ from backend.style import (
     get_user_profile,
 )
 from backend.utils import filter_suggestions, build_final_corrections
-from transformers import pipeline
+from backend.context import filter_by_context
+from backend.ai_grammar import improve_text_neural, model_info
+
+logger = logging.getLogger(__name__)
+
 # -------------------------------------------------------------------
 # App setup
 # -------------------------------------------------------------------
@@ -104,7 +110,12 @@ def analyze(request: AnalyzeRequest):
         grammar_result = correct_text(text)
         errors = grammar_result["errors"]
 
-        # IMPORTANT: don't trust auto-corrected text
+        # Step 1.5 - Context Analysis (Step 3 in user spec)
+        # Ensure suggestions don't fundamentally change the sentence meaning
+        errors = filter_by_context(errors, text)
+
+        # IMPORTANT: don't trust auto-corrected text directly; 
+        # we rebuild it at the end
         corrected = text
 
         # Step 2 – Domain detection
@@ -121,9 +132,7 @@ def analyze(request: AnalyzeRequest):
         filtered = filter_suggestions(errors, style_profile, domain)
         final = build_final_corrections(text, corrected, filtered)
 
-        print("ERRORS:", errors)
-        print("FILTERED:", filtered)
-        print("FINAL:", final)
+        logger.debug("errors=%s filtered=%s final=%s", errors, filtered, final)
 
         return AnalyzeResponse(
             original_text=text,
@@ -172,46 +181,13 @@ def fetch_docs(user_id:str):
     docs=get_documents(user_id)
     return {"documents":docs}
 
-_ai_model = None
-
-def get_ai_model():
-    global _ai_model
-    if _ai_model is None:
-        try:
-            _ai_model = pipeline(
-                "text2text-generation",
-                model="vennify/t5-base-grammar-correction"
-            )
-        except Exception as e:
-            print("AI load failed:", e)
-            _ai_model = None
-    return _ai_model
-
 @app.post("/ai-improve")
 def ai_improve(request: AnalyzeRequest):
-    model = get_ai_model()
+    """
+    Neural seq2seq grammar polish (separate from LanguageTool /analyze).
 
-    if model is None:
-        return {"improved_text": request.text}
-
-    try:
-        prompt = f"""
-Correct the grammar and improve clarity of the following sentence.
-Make it natural and fluent.
-
-Sentence: {request.text}
-
-Improved:
-"""
-
-        result = model(
-            prompt,  
-            max_length=128,
-            num_beams=4,
-            do_sample=False
-        )[0]["generated_text"]
-
-        return {"improved_text": result}
-
-    except Exception as e:
-        return {"improved_text": request.text}
+    Model and prefix are configurable via GRAMMAR_AI_MODEL and GRAMMAR_AI_PREFIX
+    (see backend/ai_grammar.py). Defaults to vennify/t5-base-grammar-correction.
+    """
+    improved = improve_text_neural(request.text)
+    return {"improved_text": improved, "grammar_ai": model_info()}

@@ -1,13 +1,17 @@
 {
   "user_001": {
-    "avg_sentence_length": 10.8298,
-    "lexical_diversity": 0.0858,
-    "punctuation_frequency": 0.2401,
-    "formality_score": 0.5006,
-    "tone": "formal",
-    "sentence_count": 1.2203,
-    "total_tokens": 13.3635,
-    "sample_count": 15
+    "avg_sentence_length": 6.6786,
+    "lexical_diversity": 0.1969,
+    "punctuation_frequency": 0.2111,
+    "formality_score": 0.2881,
+    "tone": "casual",
+    "sentence_count": 1.0525,
+    "total_tokens": 6.8712,
+    "sample_count": 45,
+    "feedback_total": 4,
+    "feedback_accept": 3,
+    "feedback_accept_rate": 0.75,
+    "feedback_reject": 1
   },
   "Rohit": {
     "avg_sentence_length": 11.5001,
@@ -18,5 +22,15 @@
     "sentence_count": 1.9999,
     "total_tokens": 22.9999,
     "sample_count": 35
+  },
+  "test_user": {
+    "avg_sentence_length": 6.0,
+    "lexical_diversity": 0.1667,
+    "punctuation_frequency": 1.0,
+    "formality_score": 0.2,
+    "tone": "casual",
+    "sentence_count": 1.0,
+    "total_tokens": 6.0,
+    "sample_count": 2
   }
 }
