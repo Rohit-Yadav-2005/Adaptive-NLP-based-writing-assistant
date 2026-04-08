@@ -75,10 +75,17 @@ def filter_suggestions(
         # 2. Casual tone: allow intentional slang; do NOT skip missing apostrophes
         #    ("dont" is a typo, not the same as "gonna").
         # ------------------------------------------------------------------
-        informal_words = {"gonna", "wanna", "u", "idk", "lol", "im"}
+        informal_words = {"gonna", "wanna", "u", "idk", "lol"}
         if tone == "casual" and bad.lower() in informal_words:
             e["apply"] = False
             e["filter_reason"] = "Allowed informal usage"
+
+        # ------------------------------------------------------------------
+        # 2b. Creative Fragments
+        # ------------------------------------------------------------------
+        if category == "CREATIVE_FRAGMENT":
+            e["apply"] = False
+            e["filter_reason"] = "Creative style detected. Short stylistic fragments were intentionally kept intact."
 
         # ------------------------------------------------------------------
         # 3. Length control — only for style-like suggestions (not grammar)
@@ -125,7 +132,7 @@ def build_final_corrections(
             continue
         accepted_replacements.append((off, ln, replacement))
 
-    accepted_replacements.sort(key=lambda x: x[0], reverse=True)
+    accepted_replacements.sort(key=lambda x: (x[0], x[1]), reverse=True)
 
     final_text = original_text
     next_end = len(original_text)

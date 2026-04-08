@@ -39,11 +39,14 @@ def _get_classifier():
 
 def _heuristic_classify(text: str) -> Dict[str, Any]:
     text = text.lower()
+    
+    # Priority for direct business indicators, even if grammar is casual
+    business_indicators = ["meeting", "project", "client", "deadline", "ceo", "business", "corp", "review", "report", "attached"]
+    if any(word in text for word in business_indicators):
+        return {"domain": "business", "confidence": 0.9, "all_scores": {"business": 0.9}}
+
     if any(word in text for word in ["research", "study", "analysis", "paper", "hypothesis", "theory"]):
         return {"domain": "academic", "confidence": 0.8, "all_scores": {}}
-
-    if any(word in text for word in ["meeting", "project", "client", "deadline", "ceo", "business", "corp"]):
-        return {"domain": "business", "confidence": 0.8, "all_scores": {}}
 
     # Technical
     if any(word in text for word in ["code", "software", "api", "database", "server", "linux"]):
@@ -53,6 +56,11 @@ def _heuristic_classify(text: str) -> Dict[str, Any]:
 
 
 def classify_domain(text: str) -> Dict[str, Any]:
+    # Heuristics check first: Override zero-shot for strong business vocabulary
+    heuristic = _heuristic_classify(text)
+    if heuristic["domain"] == "business" and heuristic["confidence"] > 0.85:
+        return heuristic
+
     classifier = _get_classifier()
     
     if HAS_CLASSIFIER and classifier:
