@@ -1,6 +1,6 @@
 # ✍️ Adaptive NLP-Based Writing Assistant
 
-> Context-aware, personalized grammar correction that adapts to your writing style.
+> Context-aware, personalized grammar correction that adapts to your writing style. 8-4-2026
 
 ## 🏗 Architecture
 
