@@ -52,5 +52,35 @@
     "sentence_count": 3,
     "total_tokens": 56,
     "sample_count": 1
+  },
+  "user_4": {
+    "avg_sentence_length": 9.27608,
+    "lexical_diversity": 0.9268732142857146,
+    "punctuation_frequency": 1.2547550000000003,
+    "formality_score": 0.0,
+    "tone": "casual",
+    "sentence_count": 1.40951,
+    "total_tokens": 15.009220000000004,
+    "sample_count": 6
+  },
+  "user_6": {
+    "avg_sentence_length": 3.0,
+    "lexical_diversity": 1.0,
+    "punctuation_frequency": 0.0,
+    "formality_score": 0.0,
+    "tone": "casual",
+    "sentence_count": 1,
+    "total_tokens": 3,
+    "sample_count": 1
+  },
+  "user_3": {
+    "avg_sentence_length": 14.0,
+    "lexical_diversity": 0.8214285714285715,
+    "punctuation_frequency": 1.55,
+    "formality_score": 0.0,
+    "tone": "casual",
+    "sentence_count": 2.0,
+    "total_tokens": 28.0,
+    "sample_count": 4
   }
 }

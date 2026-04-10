@@ -195,7 +195,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @app.post("/api/v2/analyze")
 def analyze_text(request: AnalyzeRequest, user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
     """Analyze text using the LLM engine with user-specific style profile and Vault context."""
-    from .vault import search_vault
     
     # 1. Extract style profile
     features = extract_features(request.text)
@@ -205,7 +204,12 @@ def analyze_text(request: AnalyzeRequest, user: User = Depends(get_authenticated
     org_id = user.organizations[0].id if user.organizations else None
     vault_context = []
     if org_id:
-        vault_context = search_vault(request.text, org_id)
+        try:
+            from .vault import search_vault
+            vault_context = search_vault(request.text, org_id)
+        except Exception:
+            # Vault dependencies (pypdf, chromadb) may not be installed - skip gracefully
+            vault_context = []
     
     try:
         # Pass vault research context to LLM
@@ -227,6 +231,7 @@ def analyze_text(request: AnalyzeRequest, user: User = Depends(get_authenticated
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # -------------------------------------------------------------------
 # Document & Workspace Management

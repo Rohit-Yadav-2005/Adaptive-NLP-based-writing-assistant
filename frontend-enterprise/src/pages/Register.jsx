@@ -18,19 +18,14 @@ const Register = () => {
     setError('');
     
     try {
-      await authApi.register({
+      const resp = await authApi.register({
         email,
         password,
         full_name: fullName
       });
       
-      // Auto-login after registration
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-      const loginResp = await authApi.login(formData);
-      
-      localStorage.setItem('enterprise_token', loginResp.data.access_token);
+      // The register endpoint already returns an access_token
+      localStorage.setItem('enterprise_token', resp.data.access_token);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Account creation failed');

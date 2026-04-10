@@ -1,13 +1,20 @@
 import os
+import sys
 import json
 import spacy
 import subprocess
 
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
+nlp = None
+
+def get_nlp():
+    global nlp
+    if nlp is None:
+        try:
+            nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"], check=True)
+            nlp = spacy.load("en_core_web_sm")
+    return nlp
 
 PROFILE_FILE = "data/user_profiles.json"
 ALPHA = 0.1 # EMA factor
@@ -27,7 +34,7 @@ def _save_profiles(profiles):
         json.dump(profiles, f, indent=2)
 
 def extract_features(text: str) -> dict:
-    doc = nlp(text)
+    doc = get_nlp()(text)
     sentences = list(doc.sents)
     tokens = [token for token in doc if not token.is_punct and not token.is_space]
     
