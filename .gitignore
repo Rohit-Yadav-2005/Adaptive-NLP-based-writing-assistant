@@ -1,9 +1,44 @@
-.venv/
-venv/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.toast
+.wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Databases & Environments
 .env
-.cache/
-models/
+*.db
 data/*.db
 data/*.json
+!data/vault/.gitkeep
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+.stylelintcache
+frontend-enterprise/node_modules/
+frontend-enterprise/dist/
+frontend/node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

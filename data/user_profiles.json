@@ -1,13 +1,13 @@
 {
   "user_001": {
-    "avg_sentence_length": 9.211164079418898,
-    "lexical_diversity": 0.8982428114949127,
-    "punctuation_frequency": 1.1172247414985177,
-    "formality_score": 0.060605260964634,
-    "tone": "formal",
-    "sentence_count": 2.6662363647840253,
-    "total_tokens": 24.908555041016996,
-    "sample_count": 130,
+    "avg_sentence_length": 7.9999386138963775,
+    "lexical_diversity": 0.9177190095797912,
+    "punctuation_frequency": 1.0044568365524196,
+    "formality_score": 0.04418123524321819,
+    "tone": "casual",
+    "sentence_count": 2.404686309927555,
+    "total_tokens": 19.918336624901393,
+    "sample_count": 133,
     "feedback_total": 6,
     "feedback_accept": 5,
     "feedback_accept_rate": 0.8333333333333334,
@@ -42,5 +42,15 @@
     "sentence_count": 2.0,
     "total_tokens": 13.000000000000002,
     "sample_count": 2
+  },
+  "user_1": {
+    "avg_sentence_length": 18.666666666666668,
+    "lexical_diversity": 0.8392857142857143,
+    "punctuation_frequency": 1.0,
+    "formality_score": 0.0,
+    "tone": "casual",
+    "sentence_count": 3,
+    "total_tokens": 56,
+    "sample_count": 1
   }
 }

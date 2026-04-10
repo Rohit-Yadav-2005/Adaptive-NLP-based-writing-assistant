@@ -1,114 +1,49 @@
-# ✍️ Adaptive NLP-Based Writing Assistant
+# 🚀 Nexus AI: Enterprise Writing Platform (V2.1)
 
-> Context-aware, personalized grammar correction that adapts to your writing style. 8-4-2026
+Nexus AI has been transformed from a local NLP script into a high-performance, enterprise-grade distributed platform. It now features professional team workspaces, cryptographic authentication, and cloud-powered semantic reasoning.
 
-## 🏗 Architecture
+## ✨ Evolution Summary
+- **Before**: 2GB+ local ML models, slow load times, no user management.
+- **After**: Sleek React/Vite frontend, JWT-protected FastAPI backend, and high-availability Gemini API integration.
 
-```
-User Text
-    │
-    ▼
-┌────────────────────┐
-│  Grammar Checker   │  language_tool_python
-│  (detect & fix)    │
-└────────┬───────────┘
-         │
-         ▼
-┌────────────────────┐
-│ Domain Classifier  │  HuggingFace zero-shot (BART-large-MNLI)
-│ (academic/casual/  │
-│  business)         │
-└────────┬───────────┘
-         │
-         ▼
-┌────────────────────┐
-│  Style Analyzer    │  spaCy  →  per-user JSON profiles
-│  (sentence length, │
-│   diversity, tone) │
-└────────┬───────────┘
-         │
-         ▼
-┌────────────────────┐
-│ Style-Aware Filter │  Avoids over-correction
-│ (keep / skip each  │
-│  suggestion)       │
-└────────┬───────────┘
-         │
-         ▼
-     Response JSON
-```
+## 🏗️ Technical Stack
+- **Frontend**: React 18, Vite, Tailwind CSS, Framer Motion, Lucide.
+- **Backend**: FastAPI, SQLAlchemy (SQLite), JWT (jose/passlib).
+- **Core AI**: Google Gemini 2.5 Flash-Lite (Low latency cluster).
+
+## 🛠️ Getting Started
+
+### 1. Prerequisites
+- Node.js (v18+)
+- Python (v3.10+)
+
+### 2. Backend Setup
+1. `pip install -r requirements.txt`
+2. Create/Update your `.env` file:
+   ```env
+   GEMINI_API_KEY=your_key_here
+   JWT_SECRET_KEY=your_long_secret_string
+   ```
+3. Start the engine: `uvicorn backend.main:app --reload --port 8000`
+
+### 3. Frontend Setup
+1. `cd frontend-enterprise`
+2. `npm install`
+3. `npm run dev`
 
 ## 📂 Project Structure
+- `backend/`: FastAPI server with SQLAlchemy models and Auth logic.
+- `frontend-enterprise/`: Modern React project with dashboard and editor.
+- `data/`: SQLite database (enterprise_v2.db).
+- `venv/`: Shared python virtual environment.
 
-```
-project/
-├── backend/
-│   ├── main.py        # FastAPI app & /analyze endpoint
-│   ├── grammar.py     # Grammar detection & correction
-│   ├── domain.py      # Zero-shot domain classification
-│   ├── style.py       # Style feature extraction & user profiles
-│   └── utils.py       # Style-aware suggestion filter
-├── frontend/
-│   └── app.py         # Streamlit UI
-├── data/              # User profiles (auto-generated)
-├── models/            # (reserved for fine-tuned models)
-├── tests/
-│   └── test_pipeline.py
-├── requirements.txt
-└── README.md
-```
-
-## 🚀 Quick Start
-
-### 1. Install dependencies
-
-```bash
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm
-```
-
-Note: `language-tool-python` typically requires **Java 17+**. If Java is older, grammar correction will fall back to lightweight rule-based fixes.
-
-### 2. Start the backend (FastAPI)
-
-```bash
-uvicorn backend.main:app --reload --port 8000
-```
-
-### 3. Start the frontend (Streamlit)
-
-```bash
-streamlit run frontend/app.py
-```
-
-### 4. Use the API directly
-
-```bash
-curl -X POST http://127.0.0.1:8000/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": "user_001", "text": "The experiment results was interesting."}'
-```
-
-## 📡 API Reference
-
-### `POST /analyze`
-
-**Request body:**
-
-| Field     | Type   | Description                     |
-|-----------|--------|---------------------------------|
-| `user_id` | string | Unique identifier for the user  |
-| `text`    | string | Text to analyze and correct     |
-
-**Response:**
-
+---
+*Built for the Enterprise. Powered by Nexus AI.*
 | Field                 | Type   | Description                             |
 |-----------------------|--------|-----------------------------------------|
 | `original_text`       | string | The input text                          |
 | `corrected_text`      | string | Grammar-corrected text                  |
 | `domain`              | string | Detected domain (academic/casual/business) |
-| `domain_confidence`   | float  | Confidence score for domain prediction  |
-| `domain_advice`       | string | Writing advice for the detected domain  |
 | `style_profile`       | object | User's accumulated style features       |
 | `corrections_applied` | int    | Number of corrections applied           |
 | `corrections_skipped` | int    | Number of corrections skipped (style filter) |

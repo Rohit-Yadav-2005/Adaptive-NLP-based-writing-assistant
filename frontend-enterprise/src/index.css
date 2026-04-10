@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0b1020;
+  --color-card: #121a2f;
+  --color-accent: #7c9dff;
+  --color-accent-secondary: #57e3b0;
+  --color-muted: #9cb0d8;
+  
+  --background-image-vibrant-gradient: radial-gradient(1000px 420px at 10% -10%, #1a2a57 0%, transparent 60%), radial-gradient(1000px 420px at 90% -20%, #1c3a4f 0%, transparent 60%);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-white antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .premium-card {
+    @apply bg-card border border-white/10 rounded-2xl shadow-xl backdrop-blur-md;
+  }
+  
+  .glass-effect {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  }
+  
+  .button-primary {
+    @apply bg-accent hover:bg-accent/90 text-background font-bold py-3 px-6 rounded-xl transition-all active:scale-95 disabled:opacity-50;
+  }
+  
+  .sidebar-label {
+    @apply text-[9px] font-black text-muted uppercase tracking-widest ml-2 mb-2 block;
+  }
+  
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
